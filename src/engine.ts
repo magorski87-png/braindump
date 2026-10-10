@@ -1,0 +1,5 @@
+import type {Category} from './types';
+export interface ClassificationEngine {classify(input:string):{category:Category;actions:string[];engine:string}}
+export const splitManually=(value:string)=>value.split(/\n|;|,(?=\s*(?:and\s+)?[a-z])/i).map(s=>s.trim().replace(/^and\s+/i,'')).filter(Boolean);
+const verbs=/^(buy|pick up|get|send|email|call|check|fix|replace|order|book|schedule|clean|review|measure|install|build|follow up|finish|remind)/i;
+export const rulesEngine:ClassificationEngine={classify(input){const text=input.trim();const lines=splitManually(text).flatMap(s=>s.split(/\s+and\s+(?=(?:buy|send|email|check|call|fix|replace|order|book|review|pick up)\b)/i));const actions=lines.filter(s=>verbs.test(s)).map(s=>s.trim());const category:Category=/\b(idea|what if|could we)\b/i.test(text)?'Idea':/\b(buy|purchase|pick up|groceries)\b/i.test(text)?'Shopping':/\b(remind|remember|appointment|due)\b/i.test(text)?'Reminder':/\?$/.test(text)?'Question':actions.length?'Task':'Reference';return {category,actions,engine:'local-rules-v1'}}};
